@@ -1,17 +1,755 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的第一个 GitHub Pages 网页</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>鱼竿 · 渔轮强度计算器 (含摩擦拉力)</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #0366d6; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f5f7fb;
+        }
+
+        .wrap {
+            padding: 1.5rem 1rem;
+            max-width: 720px;
+            margin: 0 auto;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.25rem;
+            letter-spacing: -0.2px;
+            padding-left: 0.25rem;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            background: #ffffffcc;
+            backdrop-filter: blur(2px);
+            border-radius: 40px;
+            padding: 4px;
+            width: fit-content;
+            border: 0.5px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 6px 20px;
+            border-radius: 32px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            color: #475569;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .tab.active {
+            background: #1e293b;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .section {
+            background: #ffffff;
+            border: 0.5px solid #e9eef3;
+            border-radius: 24px;
+            padding: 1.25rem 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .sec-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #5b6e8c;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sec-title::before {
+            content: '';
+            width: 4px;
+            height: 14px;
+            background: #3b82f6;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .row2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .field {
+            margin-bottom: 0.9rem;
+        }
+
+        .field label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #4a5b7a;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .field input[type="number"] {
+            width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            background: #fefefe;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #0f172a;
+            transition: 0.15s;
+        }
+
+        .field input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+
+        .field input[type="number"]::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+            font-size: 0.8rem;
+        }
+
+        .srow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .srow input[type="range"] {
+            flex: 1;
+            height: 4px;
+            border-radius: 10px;
+            background: #e2e8f0;
+        }
+
+        .sval {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 20px;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .bar-bg {
+            background: #eef2f6;
+            border-radius: 12px;
+            height: 6px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.2s;
+        }
+
+        .rg {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 0.5rem;
+        }
+
+        .rc {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 0.9rem 1rem;
+            border: 0.5px solid #eef2f8;
+        }
+
+        .rl {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #5e6f8d;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+
+        .rv {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .rs {
+            font-size: 0.7rem;
+            color: #6c7e9e;
+            margin-top: 6px;
+        }
+
+        .green .rv { color: #1e7b4b; }
+        .blue .rv { color: #2c6e9e; }
+        .orange .rv { color: #c2410c; }
+
+        hr {
+            border: none;
+            border-top: 1px solid #eef2f8;
+            margin: 1rem 0;
+        }
+
+        .fnote {
+            font-size: 0.7rem;
+            color: #6c7e9e;
+            line-height: 1.5;
+            background: #fafcff;
+            padding: 0.8rem;
+            border-radius: 16px;
+        }
+
+        .result-block {
+            border: 0.5px solid #e2edf7;
+            border-radius: 20px;
+            padding: 1rem 1.2rem;
+            margin-top: 0.75rem;
+            background: #fefefe;
+        }
+
+        .result-block .label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #5e6f8d;
+            margin-bottom: 6px;
+        }
+
+        .result-block .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e7b4b;
+        }
+
+        .result-block.unreachable .value {
+            color: #dc2626;
+            font-size: 1.2rem;
+        }
+
+        .card-reel {
+            border-left: 3px solid #1e7b4b;
+        }
+
+        .card-rod {
+            border-left: 3px solid #2c6e9e;
+        }
+
+        .friction-highlight {
+            transition: all 0.1s;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: #e2e8f0;
+        }
+        input[type="range"]:focus {
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        .info-placeholder {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
-    <h1>✅ 部署成功！</h1>
-    <p>这是我用单个 HTML 文件创建的静态网页。</p>
-    <p>当前时间：2026 年</p>
+<div class="wrap">
+    <h2>🎣 鱼竿 · 渔轮强度计算器</h2>
+
+    <div class="tab-bar">
+        <button class="tab active" id="tab-calc" onclick="setTab('calc')">⚙️ 强度计算</button>
+        <button class="tab" id="tab-target" onclick="setTab('target')">🔁 反推最大磨损</button>
+    </div>
+
+    <!-- ================= TAB 1: 强度计算 ================= -->
+    <div id="panel-calc">
+        <!-- 板块1：渔轮参数 -->
+        <div class="section">
+            <div class="sec-title">渔轮参数 (锁轮强度)</div>
+            <div class="row2">
+                <div class="field">
+                    <label>🔒 锁轮初始拉力 (kg)</label>
+                    <input type="number" id="c-rs" value="" placeholder="请输入数值" min="0.1" step="0.1" oninput="calcStrengths()">
+                </div>
+                <div class="field">
+                    <label>📊 强度保留比例</label>
+                    <div class="srow">
+                        <input type="range" id="c-rr" min="1" max="100" value="30" step="1" oninput="document.getElementById('c-rr-v').textContent=this.value+'%';calcStrengths()">
+                        <span class="sval" id="c-rr-v">30%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>⚠️ 当前磨损 (%)</label>
+                <div class="srow">
+                    <input type="range" id="c-rw" min="0" max="100" value="0" step="1" oninput="document.getElementById('c-rw-v').textContent=this.value+'%';document.getElementById('c-rw-bar').style.width=this.value+'%';calcStrengths()">
+                    <span class="sval" id="c-rw-v">0%</span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill" id="c-rw-bar" style="width:0%;background:#1e7b4b"></div></div>
+            </div>
+        </div>
+
+        <!-- 板块2：鱼竿参数 -->
+        <div class="section">
+            <div class="sec-title">鱼竿参数</div>
+            <div class="row2">
+                <div class="field">
+                    <label>🎣 竿体初始强度 (kg)</label>
+                    <input type="number" id="c-rods" value="" placeholder="请输入数值" min="0.1" step="0.1" oninput="calcStrengths()">
+                </div>
+                <div class="field">
+                    <label>📈 强度保留比例</label>
+                    <div class="srow">
+                        <input type="range" id="c-rodr" min="1" max="100" value="10" step="1" oninput="document.getElementById('c-rodr-v').textContent=this.value+'%';calcStrengths()">
+                        <span class="sval" id="c-rodr-v">10%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>⚠️ 当前磨损 (%)</label>
+                <div class="srow">
+                    <input type="range" id="c-rodw" min="0" max="100" value="0" step="1" oninput="document.getElementById('c-rodw-v').textContent=this.value+'%';document.getElementById('c-rodw-bar').style.width=this.value+'%';calcStrengths()">
+                    <span class="sval" id="c-rodw-v">0%</span>
+                </div>
+                <div class="bar-bg"><div class="bar-fill" id="c-rodw-bar" style="width:0%;background:#2c6e9e"></div></div>
+            </div>
+        </div>
+
+        <!-- 板块3：系统强度评估 -->
+        <div class="section">
+            <div class="sec-title">系统强度评估</div>
+            <div class="rg">
+                <div class="rc green">
+                    <div class="rl">渔轮剩余强度</div>
+                    <div class="rv" id="res-reel-v">—</div>
+                    <div class="rs" id="res-reel-s"></div>
+                </div>
+                <div class="rc blue">
+                    <div class="rl">鱼竿剩余强度</div>
+                    <div class="rv" id="res-rod-v">—</div>
+                    <div class="rs" id="res-rod-s"></div>
+                </div>
+                <div class="rc orange">
+                    <div class="rl">系统瓶颈</div>
+                    <div class="rv" id="res-min-v">—</div>
+                    <div class="rs" id="res-min-s"></div>
+                </div>
+                <div class="rc">
+                    <div class="rl">搭配匹配度</div>
+                    <div class="rv" id="res-match-v">—</div>
+                    <div class="rs" id="res-match-s"></div>
+                </div>
+            </div>
+            <hr>
+            <div class="fnote">📐 剩余强度公式：S × R + S × (1-R) × (1-W)<br>S=初始强度 · R=保留比例 · W=磨损比例</div>
+        </div>
+
+        <!-- 板块4：渔轮摩擦拉力计算 (第一个选项卡最后一个板块) -->
+        <div class="section friction-highlight">
+            <div class="sec-title">🎛️ 渔轮摩擦拉力计算</div>
+            <div class="row2">
+                <div class="field">
+                    <label>🧲 摩擦制动力 (kg)</label>
+                    <input type="number" id="fric-force" value="" placeholder="请输入数值" min="0" step="0.1" oninput="updateFriction()">
+                </div>
+                <div class="field">
+                    <label>🔧 损耗度 (%)</label>
+                    <div class="srow">
+                        <input type="range" id="fric-wear" min="0" max="100" value="0" step="1" oninput="document.getElementById('fric-wear-val').textContent=this.value+'%'; updateFriction()">
+                        <span class="sval" id="fric-wear-val">0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>⚙️ 摩擦片档位 (1 ~ 29)</label>
+                <div class="srow">
+                    <input type="range" id="fric-pad" min="1" max="29" value="1" step="1" oninput="document.getElementById('fric-pad-val').textContent=this.value; updateFriction()">
+                    <span class="sval" id="fric-pad-val">1</span>
+                </div>
+                <div class="bar-bg" style="margin-top: 8px;">
+                    <div class="bar-fill" id="fric-pad-bar" style="width: calc(1 / 29 * 100%); background: #3b82f6;"></div>
+                </div>
+            </div>
+            <!-- 结果展示区 -->
+            <div class="rc green" style="margin-top: 1rem; background: #f0fdf4; border: 0.5px solid #cfe8d4;">
+                <div class="rl" style="color:#2b6e3c;">🎯 最终有效拉力</div>
+                <div class="rv" id="fric-result" style="font-size: 1.9rem;">—</div>
+                <div class="rs">公式: 制动力 × (1 - 损耗度%) × (摩擦片 / 29)</div>
+            </div>
+            <div class="fnote" style="margin-top: 0.8rem;">
+                💡 示例：摩擦制动力14.5kg，损耗10%，摩擦片20 → 14.5 × 0.9 × (20/29) = <strong>9.00 kg</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: 反推最大磨损 -->
+    <div id="panel-target" style="display:none">
+        <div class="section">
+            <div class="sec-title">渔轮参数 (反推)</div>
+            <div class="row2">
+                <div class="field">
+                    <label>锁轮初始拉力 (kg)</label>
+                    <input type="number" id="t-rs" value="" placeholder="请输入数值" min="0.1" step="0.1" oninput="calcTarget()">
+                </div>
+                <div class="field">
+                    <label>强度保留比例</label>
+                    <div class="srow">
+                        <input type="range" id="t-rr" min="1" max="100" value="30" step="1" oninput="document.getElementById('t-rr-v').textContent=this.value+'%';calcTarget()">
+                        <span class="sval" id="t-rr-v">30%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>🎯 渔轮目标最低强度 (kg)</label>
+                <input type="number" id="t-reel-target" value="" placeholder="请输入数值" min="0.01" step="0.1" oninput="calcTarget()">
+            </div>
+            <div class="result-block card-reel" id="t-reel-card">
+                <div class="label">渔轮最大允许磨损</div>
+                <div class="value" id="t-reel-mw">—</div>
+                <div class="sub" id="t-reel-sub"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="sec-title">鱼竿参数 (反推)</div>
+            <div class="row2">
+                <div class="field">
+                    <label>竿体初始强度 (kg)</label>
+                    <input type="number" id="t-rods" value="" placeholder="请输入数值" min="0.1" step="0.1" oninput="calcTarget()">
+                </div>
+                <div class="field">
+                    <label>强度保留比例</label>
+                    <div class="srow">
+                        <input type="range" id="t-rodr" min="1" max="100" value="10" step="1" oninput="document.getElementById('t-rodr-v').textContent=this.value+'%';calcTarget()">
+                        <span class="sval" id="t-rodr-v">10%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>🎯 鱼竿目标最低强度 (kg)</label>
+                <input type="number" id="t-rod-target" value="" placeholder="请输入数值" min="0.01" step="0.1" oninput="calcTarget()">
+            </div>
+            <div class="result-block card-rod" id="t-rod-card">
+                <div class="label">鱼竿最大允许磨损</div>
+                <div class="value" id="t-rod-mw">—</div>
+                <div class="sub" id="t-rod-sub"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="fnote">
+                🔁 反推公式：最大磨损 W = 1 − (目标 − S×R) / (S×(1−R))<br>
+                📌 当目标 ≤ S×R 时，磨损可达100%（保留量已满足）<br>
+                📌 当目标 > 初始满强度时，目标不可达
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 核心强度计算函数 ----------
+    function eff(S, R, W) {
+        if (isNaN(S) || S <= 0) return NaN;
+        return S * (R / 100) + S * (1 - R / 100) * (1 - W / 100);
+    }
+
+    function safeGetValue(id, defaultVal = NaN) {
+        const el = document.getElementById(id);
+        if (!el) return defaultVal;
+        const val = parseFloat(el.value);
+        return isNaN(val) ? defaultVal : val;
+    }
+
+    // 检查输入是否有效
+    function isValidNumber(val) {
+        return typeof val === 'number' && !isNaN(val) && val > 0;
+    }
+
+    // 强度计算 (Tab1)
+    function calcStrengths() {
+        const rs = safeGetValue('c-rs');
+        const rr = safeGetValue('c-rr', 30);
+        const rw = safeGetValue('c-rw', 0);
+        const rods = safeGetValue('c-rods');
+        const rodr = safeGetValue('c-rodr', 10);
+        const rodw = safeGetValue('c-rodw', 0);
+
+        const reelValid = isValidNumber(rs);
+        const rodValid = isValidNumber(rods);
+
+        // 渔轮结果处理
+        let reelE, rodE;
+        if (reelValid) {
+            reelE = eff(rs, rr, rw);
+            if (!isNaN(reelE)) {
+                document.getElementById('res-reel-v').textContent = reelE.toFixed(2) + ' kg';
+                const reelPercent = (reelE / rs * 100).toFixed(1);
+                document.getElementById('res-reel-s').textContent = '初始' + rs.toFixed(1) + ' kg，保留' + reelPercent + '%';
+            } else {
+                document.getElementById('res-reel-v').textContent = '无效';
+                document.getElementById('res-reel-s').textContent = '请填写初始强度';
+            }
+        } else {
+            document.getElementById('res-reel-v').textContent = '—';
+            document.getElementById('res-reel-s').textContent = '请填写初始强度';
+            reelE = NaN;
+        }
+
+        // 鱼竿结果处理
+        if (rodValid) {
+            rodE = eff(rods, rodr, rodw);
+            if (!isNaN(rodE)) {
+                document.getElementById('res-rod-v').textContent = rodE.toFixed(2) + ' kg';
+                const rodPercent = (rodE / rods * 100).toFixed(1);
+                document.getElementById('res-rod-s').textContent = '初始' + rods.toFixed(1) + ' kg，保留' + rodPercent + '%';
+            } else {
+                document.getElementById('res-rod-v').textContent = '无效';
+                document.getElementById('res-rod-s').textContent = '请填写初始强度';
+            }
+        } else {
+            document.getElementById('res-rod-v').textContent = '—';
+            document.getElementById('res-rod-s').textContent = '请填写初始强度';
+            rodE = NaN;
+        }
+
+        // 系统瓶颈
+        if (isValidNumber(reelE) && isValidNumber(rodE)) {
+            const minE = Math.min(reelE, rodE);
+            const minWho = reelE <= rodE ? '渔轮' : '鱼竿';
+            document.getElementById('res-min-v').textContent = minE.toFixed(2) + ' kg';
+            document.getElementById('res-min-s').textContent = minWho + '为当前瓶颈';
+            const ratio = Math.min(reelE, rodE) / Math.max(reelE, rodE);
+            const matchPercent = (ratio * 100).toFixed(0);
+            document.getElementById('res-match-v').textContent = matchPercent + '%';
+            let matchText = ratio >= 0.9 ? '搭配均衡' : (ratio >= 0.7 ? '基本匹配' : '强度差距较大');
+            document.getElementById('res-match-s').textContent = matchText;
+        } else {
+            document.getElementById('res-min-v').textContent = '—';
+            document.getElementById('res-min-s').textContent = '请填写完整参数';
+            document.getElementById('res-match-v').textContent = '—';
+            document.getElementById('res-match-s').textContent = '需要完整数据';
+        }
+    }
+
+    // 反推磨损 (Tab2)
+    function renderResult(cardId, mwId, subId, S, R, target) {
+        const card = document.getElementById(cardId);
+        const mwEl = document.getElementById(mwId);
+        const subEl = document.getElementById(subId);
+        if (!card || !mwEl || !subEl) return;
+
+        card.classList.remove('unreachable');
+
+        if (!isValidNumber(S) || !isValidNumber(target)) {
+            mwEl.textContent = '—';
+            subEl.textContent = '请填写初始强度及目标值';
+            return;
+        }
+
+        const fullEff = eff(S, R, 0);
+        if (target > fullEff) {
+            card.classList.add('unreachable');
+            mwEl.textContent = '目标不可达';
+            subEl.textContent = `初始满强度 ${fullEff.toFixed(2)} kg 已低于目标`;
+            return;
+        }
+
+        const base = S * (R / 100);
+        const elastic = S * (1 - R / 100);
+        if (target <= base) {
+            mwEl.textContent = '100%';
+            subEl.textContent = `保留量 ${base.toFixed(2)} kg 已满足目标，无磨损限制`;
+            return;
+        }
+
+        let w = (1 - (target - base) / elastic) * 100;
+        if (w < 0) {
+            card.classList.add('unreachable');
+            mwEl.textContent = '目标不可达';
+            subEl.textContent = '计算异常，请检查参数';
+            return;
+        }
+        mwEl.textContent = w.toFixed(1) + '%';
+        subEl.textContent = `超过此磨损后有效强度将低于 ${target.toFixed(2)} kg`;
+    }
+
+    function calcTarget() {
+        const rs = safeGetValue('t-rs');
+        const rr = safeGetValue('t-rr', 30);
+        const rods = safeGetValue('t-rods');
+        const rodr = safeGetValue('t-rodr', 10);
+        const reelTarget = safeGetValue('t-reel-target');
+        const rodTarget = safeGetValue('t-rod-target');
+        renderResult('t-reel-card', 't-reel-mw', 't-reel-sub', rs, rr, reelTarget);
+        renderResult('t-rod-card', 't-rod-mw', 't-rod-sub', rods, rodr, rodTarget);
+    }
+
+    // ---------- 渔轮摩擦拉力计算 ----------
+    function updateFriction() {
+        let brakeForce = safeGetValue('fric-force', NaN);
+        let wearPercent = safeGetValue('fric-wear', 0);
+        let padIndex = safeGetValue('fric-pad', 1);
+
+        // 边界保护
+        if (isNaN(wearPercent)) wearPercent = 0;
+        if (isNaN(padIndex)) padIndex = 1;
+        wearPercent = Math.min(100, Math.max(0, wearPercent));
+        padIndex = Math.min(29, Math.max(1, padIndex));
+
+        // 同步滑块与数值显示
+        const wearRange = document.getElementById('fric-wear');
+        const padRange = document.getElementById('fric-pad');
+        const padValSpan = document.getElementById('fric-pad-val');
+        const wearValSpan = document.getElementById('fric-wear-val');
+        if (wearRange && Math.abs(wearRange.value - wearPercent) > 0.01) wearRange.value = wearPercent;
+        if (padRange && padRange.value != padIndex) padRange.value = padIndex;
+        if (padValSpan) padValSpan.textContent = padIndex;
+        if (wearValSpan) wearValSpan.textContent = wearPercent + '%';
+
+        // 更新摩擦片进度条
+        const padBar = document.getElementById('fric-pad-bar');
+        if (padBar) {
+            const percentWidth = (padIndex / 29) * 100;
+            padBar.style.width = percentWidth + '%';
+        }
+
+        const resultElement = document.getElementById('fric-result');
+        if (!resultElement) return;
+
+        // 检查制动力是否有效
+        if (!isValidNumber(brakeForce)) {
+            resultElement.textContent = '—';
+            return;
+        }
+
+        // 最终拉力公式: 制动力 × (1 - 损耗度/100) × (摩擦片/29)
+        const wearFactor = (1 - wearPercent / 100);
+        const padFactor = padIndex / 29;
+        let finalForce = brakeForce * wearFactor * padFactor;
+
+        if (isNaN(finalForce)) finalForce = 0;
+        finalForce = Math.max(0, finalForce);
+        resultElement.textContent = finalForce.toFixed(2) + ' kg';
+    }
+
+    // 页面切换
+    function setTab(t) {
+        const panelCalc = document.getElementById('panel-calc');
+        const panelTarget = document.getElementById('panel-target');
+        const tabCalc = document.getElementById('tab-calc');
+        const tabTarget = document.getElementById('tab-target');
+
+        if (t === 'calc') {
+            panelCalc.style.display = 'block';
+            panelTarget.style.display = 'none';
+            tabCalc.classList.add('active');
+            tabTarget.classList.remove('active');
+            calcStrengths();
+        } else {
+            panelCalc.style.display = 'none';
+            panelTarget.style.display = 'block';
+            tabTarget.classList.add('active');
+            tabCalc.classList.remove('active');
+            calcTarget();
+        }
+    }
+
+    // 绑定摩擦拉力事件并初始化
+    function bindFrictionEvents() {
+        const frictionForce = document.getElementById('fric-force');
+        const frictionWear = document.getElementById('fric-wear');
+        const frictionPad = document.getElementById('fric-pad');
+        if (frictionForce) frictionForce.addEventListener('input', updateFriction);
+        if (frictionWear) frictionWear.addEventListener('input', updateFriction);
+        if (frictionPad) frictionPad.addEventListener('input', updateFriction);
+        updateFriction();
+    }
+
+    // DOM 加载完成初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        calcStrengths();
+        calcTarget();
+        bindFrictionEvents();
+
+        // 额外确保摩擦片和损耗度手动输入同步
+        const wearRange = document.getElementById('fric-wear');
+        const wearVal = document.getElementById('fric-wear-val');
+        if (wearRange && wearVal) {
+            wearRange.addEventListener('input', function(e) {
+                wearVal.textContent = e.target.value + '%';
+            });
+        }
+        const padRangeNode = document.getElementById('fric-pad');
+        const padValNode = document.getElementById('fric-pad-val');
+        if (padRangeNode && padValNode) {
+            padRangeNode.addEventListener('input', function(e) {
+                padValNode.textContent = e.target.value;
+                const bar = document.getElementById('fric-pad-bar');
+                if (bar) {
+                    const percent = (parseFloat(e.target.value) / 29) * 100;
+                    bar.style.width = percent + '%';
+                }
+            });
+        }
+        const forceInput = document.getElementById('fric-force');
+        if (forceInput) {
+            forceInput.addEventListener('change', function() {
+                let v = parseFloat(forceInput.value);
+                if (isNaN(v)) forceInput.value = '';
+                updateFriction();
+            });
+        }
+
+        // 为所有空白输入框添加placeholder提示
+        const allNumberInputs = document.querySelectorAll('input[type="number"]');
+        allNumberInputs.forEach(input => {
+            if (!input.value && input.getAttribute('placeholder') !== '请输入数值') {
+                if (!input.getAttribute('placeholder')) {
+                    input.setAttribute('placeholder', '请输入数值');
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>
